@@ -10,7 +10,9 @@ from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer,AdminSerializer
+
+import os
 # Create your views here.
 
 @api_view(["GET"])
@@ -60,3 +62,31 @@ def registro(request):
         )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+def crear_admin(request):
+    serializer = AdminSerializer(data=request.data)
+    # verificamos la info del request
+    if serializer.is_valid():
+        # obtenemos el admin key del request
+        admin_key = serializer["admin_key"]
+        # si el admin key coincide con la del entorno
+        if admin_key == os.environ.get("ADMIN_KEY"):
+            # si el nombre de usuario no existe
+            if not User.objects.filter(username=serializer.data["username"]).exists():
+                user = User.objects.create_superuser(
+                    username = serializer["username"],
+                    first_name = serializer["first_name"],
+                    last_name = serializer["last_name"],
+                    email = serializer["email"]
+                )
+                user.set_password(serializer["password"])
+                user.save()
+
+                token = Token.objects.create(user=user)
+                return Response(
+                    {"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED
+                )
+    
+    return Response({"message":"Rejected request!"},status=status.HTTP_400_BAD_REQUEST)
+

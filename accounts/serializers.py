@@ -13,3 +13,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["first_name","last_name","username", "email","password"]
+
+class AdminSerializer(serializers.ModelSerializer):
+
+    admin_key = serializers.CharField(max_length=100,required=True)
+
+    class Meta:
+        model = User
+        fields = ["first_name","last_name","username", "email","password"]
