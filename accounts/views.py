@@ -65,13 +65,18 @@ def registro(request):
 
 @api_view(["POST"])
 def crear_admin(request):
+
+    messages = []
+
     serializer = AdminSerializer(data=request.data)
     # verificamos la info del request
     if serializer.is_valid():
         # obtenemos el admin key del request
         admin_key = serializer["admin_key"]
+        messages.append(f"admin key request: {admin_key}")
         # si el admin key coincide con la del entorno
         if admin_key == os.environ.get("ADMIN_KEY"):
+            messages.append("Admin Key provided!")
             # si el nombre de usuario no existe
             if not User.objects.filter(username=serializer.data["username"]).exists():
                 user = User.objects.create_superuser(
@@ -87,6 +92,9 @@ def crear_admin(request):
                 return Response(
                     {"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED
                 )
+            
+            else:
+                messages.append("Username already exists.")
     
-    return Response({"message":"Rejected request!"},status=status.HTTP_400_BAD_REQUEST)
+    return Response({"message":messages},status=status.HTTP_400_BAD_REQUEST)
 
