@@ -68,7 +68,9 @@ def crear_admin(request):
 
     messages = []
 
-    serializer = AdminSerializer(data=request.data)
+    ser_admin_key = os.environ.get("ADMIN_KEY")
+    serializer = AdminSerializer(data=request.data, many=False)
+    messages.append(f"admin key server: {ser_admin_key}")
     # verificamos la info del request
     if serializer.is_valid():
         # obtenemos el admin key del request
