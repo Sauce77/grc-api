@@ -68,35 +68,20 @@ def crear_admin(request):
 
     messages = []
 
-    ser_admin_key = os.environ.get("ADMIN_KEY")
-    serializer = AdminSerializer(data=request.data, many=False)
-    messages.append(f"admin key server: {ser_admin_key}")
-    # verificamos la info del request
-    if serializer.is_valid():
-        # obtenemos el admin key del request
-        admin_key = serializer["admin_key"]
-        messages.append(f"admin key request: {admin_key}")
-        # si el admin key coincide con la del entorno
-        if admin_key == os.environ.get("ADMIN_KEY"):
-            messages.append("Admin Key provided!")
-            # si el nombre de usuario no existe
-            if not User.objects.filter(username=serializer.data["username"]).exists():
-                user = User.objects.create_superuser(
-                    username = serializer["username"],
-                    first_name = serializer["first_name"],
-                    last_name = serializer["last_name"],
-                    email = serializer["email"]
-                )
-                user.set_password(serializer["password"])
-                user.save()
+    server_admin_key = os.environ.get("ADMIN_KEY")
 
-                token = Token.objects.create(user=user)
-                return Response(
-                    {"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED
-                )
-            
-            else:
-                messages.append("Username already exists.")
+    serializer = AdminSerializer(data=request.data)
+
+    if serializer.is_valid():
+        user_admin_key = serializer.validated_data.get("admin_key")
+        
+
+        if user_admin_key == server_admin_key:
+            # crear superuser
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        messages.append(serializer.errors)
     
+    messages.append(f"server admin key: {server_admin_key}")
     return Response({"message":messages},status=status.HTTP_400_BAD_REQUEST)
 

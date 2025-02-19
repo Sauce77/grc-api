@@ -16,8 +16,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AdminSerializer(serializers.ModelSerializer):
 
-    admin_key = serializers.CharField(max_length=100,required=True)
-
+    admin_key = serializers.CharField(max_length=100, read_only=True)
     class Meta:
         model = User
-        fields = ["first_name","last_name","username", "email","password","admin_key"]
+        fields = ["username","password","admin_key"]
+        extra_kwargs = {'password': {'write_only': True}, 'admin_key': {'write_only': True}}
