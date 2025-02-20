@@ -77,8 +77,21 @@ def crear_admin(request):
         
 
         if user_admin_key == server_admin_key:
+            username = serializer.validated_data.get("username")
+            first_name = serializer.validated_data.get("first_name")
+            last_name = serializer.validated_data.get("last_name")
+            email = serializer.validated_data.get("email")
+            password = serializer.validated_data.get("password")
             # crear superuser
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if not User.objects.filter(username=username).exists():
+                user = User.objects.create_superuser(
+                    username = username,
+                    first_name = first_name,
+                    last_name = last_name,
+                    email = email
+                )
+                user.set_password(password)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         messages.append(serializer.errors)
     
