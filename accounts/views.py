@@ -75,8 +75,11 @@ def crear_admin(request):
     if serializer.is_valid():
         user_admin_key = serializer.validated_data.get("admin_key")
         
-
+        messages.append("serializer valido")
         if user_admin_key == server_admin_key:
+
+            messages.append("key accepted")
+
             username = serializer.validated_data.get("username")
             first_name = serializer.validated_data.get("first_name")
             last_name = serializer.validated_data.get("last_name")
@@ -92,9 +95,11 @@ def crear_admin(request):
                 )
                 user.set_password(password)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        else: 
+            messages.append("user already exists")
     else:
         messages.append(serializer.errors)
     
-    messages.append(f"server admin key: {server_admin_key}")
     return Response({"message":messages},status=status.HTTP_400_BAD_REQUEST)
 
