@@ -85,6 +85,8 @@ def crear_admin(request):
             last_name = serializer.validated_data.get("last_name")
             email = serializer.validated_data.get("email")
             password = serializer.validated_data.get("password")
+
+            messages.append(f"username: {username}")
             # crear superuser
             if not User.objects.filter(username=username).exists():
                 user = User.objects.create_superuser(
