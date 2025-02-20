@@ -93,9 +93,9 @@ def crear_admin(request):
                     username = username,
                     first_name = first_name,
                     last_name = last_name,
-                    email = email
+                    email = email,
+                    password = password
                 )
-                user.set_password(password)
                 token = Token.objects.create(user=user)
                 return Response(
                     {"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED
