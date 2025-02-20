@@ -94,7 +94,10 @@ def crear_admin(request):
                     email = email
                 )
                 user.set_password(password)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                token = Token.objects.create(user=user)
+                return Response(
+                    {"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED
+                )
             
         else: 
             messages.append("user already exists")
