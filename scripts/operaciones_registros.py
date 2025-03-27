@@ -2,25 +2,27 @@ from extraccion.models import Registro
 from .asignacion import encontrarPerfil,encontrarAplicativo,encontrarResponsable
 from extraccion.serializers import PostRegistroSerializer,DeleteRegistroSerializer
 
+from extraccion.models import Registro
+
 def leer_op_registros(data):
     """
         Utiliza la informacion recibida en el cuerpo del request
         para crear, actualizar y borrar los registros de la base
         de datos con respecto a la extraccion. 
     """
+    messages = []
     registros = PostRegistroSerializer(data=data, many=True)
 
     if registros.is_valid():
         for registro in registros.validated_data:
-            try:
-                modificar_registro(registro)
-            except :
-                crear_registro(registro)
+            if Registro.objects.filter(app=registro["app"]).filter(usuario=registro["usuario"]).exists():
+                messages.append(modificar_registro(registro))
+            else:
+                messages.append(crear_registro(registro))
 
-        return {"message": "Se ha actualizado la informacion."}
+        return messages
 
-
-    return {"message": "Hay errores en la informacion ingresada."}
+    return f"Hay errores en la informacion ingresada."
 
 def crear_registro(validated_data):
     """
@@ -64,7 +66,7 @@ def crear_registro(validated_data):
         )
 
     except NameError:
-        return {"message": "No se pudo crear el registro."}
+        return f"No se pudo crear el registro {nombre_app}-{validated_data["usuario"]}"
     
 def modificar_registro(validated_data):
     """
@@ -77,11 +79,15 @@ def modificar_registro(validated_data):
     # obtenemos el nombre de usuario del registro
     nombre_usuario = validated_data["usuario"]
 
-    # obtenemos el registro
-    obj_registro = Registro.objects.filter(app__nombre=nombre_app).get(usuario=nombre_usuario)
-    obj_registro.ultimo_acceso = validated_data["ultimo_acceso"]
-    obj_registro.en_extraccion = True
-    obj_registro.save()
+    try:
+        # obtenemos el registro
+        obj_registro = Registro.objects.filter(app__nombre=nombre_app).get(usuario=nombre_usuario)
+        obj_registro.ultimo_acceso = validated_data["ultimo_acceso"]
+        obj_registro.responsable = validated_data["responsable"]
+        obj_registro.en_extraccion = True
+        obj_registro.save()
+    except NameError:
+        return f"No se pudo modificar el registro {nombre_app}-{validated_data["usuario"]}"
 
 def borrar_op_registros(data):
     """

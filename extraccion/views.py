@@ -57,9 +57,9 @@ def actualizar_registros(request):
     # colocamos el estado "en_extraccion" como false
     Registro.objects.all().update(en_extraccion=False)
     # recibe la extraccion
-    leer_op_registros(request.data)
+    messages = leer_op_registros(request.data)
         
-    return Response(status=status.HTTP_200_OK)
+    return Response({"messages": messages}, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
