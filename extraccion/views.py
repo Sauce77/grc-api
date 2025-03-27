@@ -9,7 +9,8 @@ from rest_framework.decorators import api_view
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from scripts.operaciones_registros import leer_op_registros,borrar_op_registros
+from scripts.operaciones_registros import modificar_registro,crear_registro,borrar_op_registros
+from extraccion.serializers import PostRegistroSerializer
 
 # Create your views here.
 
@@ -56,13 +57,23 @@ def actualizar_registros(request):
     """
     # colocamos el estado "en_extraccion" como false
     Registro.objects.all().update(en_extraccion=False)
-    # recibe la extraccion
-    messages = leer_op_registros(request.data)
 
-    if len(messages) > 0:
-        return Response({"messages": messages}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # serializar contenido de request
+    registros = PostRegistroSerializer(data=request.data, many=True)
+
+    if registros.is_valid():
+        # para cada elemento a registrar
+        for registro in registros.validated_data:
+            try:
+                modificar_registro(registro)
+            except Registro.DoesNotExist:
+                crear_registro(registro)
+            except ValueError:
+                return Response({"message": "Campo en extraccion invalido"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    return Response({"messages": "Extraccion cargada!"}, status=status.HTTP_200_OK)
+        return Response({"message":"Extraccion cargada!"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"message":"Formato de extraccion incorrecto!"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])

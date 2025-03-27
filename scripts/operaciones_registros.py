@@ -30,44 +30,40 @@ def crear_registro(validated_data):
         Crea un registro a partir de los datos validados
         de un serializer (PostRegistroSerializer)
     """
-    try:
-        # obtenemos el area
-        nombre_area = None
-        # si existe el atributo area
-        if "area" in validated_data:
-            nombre_area = validated_data["area"]
+    # obtenemos el area
+    nombre_area = None
+    # si existe el atributo area
+    if "area" in validated_data:
+        nombre_area = validated_data["area"]
 
-        # obtenemos el perfil
-        nombre_perfil = None
-        # si existe el atributo perfil
-        if "perfil" in validated_data:
-            nombre_perfil = validated_data["perfil"]
-        perfil = encontrarPerfil(nombre_perfil,nombre_area)
+    # obtenemos el perfil
+    nombre_perfil = None
+    # si existe el atributo perfil
+    if "perfil" in validated_data:
+        nombre_perfil = validated_data["perfil"]
+    perfil = encontrarPerfil(nombre_perfil,nombre_area)
 
-        # obtenemos el nombre del app
-        nombre_app = validated_data["app"]
-        # obtenemos el objeto del app
-        app = encontrarAplicativo(nombre_app)
+    # obtenemos el nombre del app
+    nombre_app = validated_data["app"]
+    # obtenemos el objeto del app
+    app = encontrarAplicativo(nombre_app)
 
-        # obtenemos el nombre del responsable
-        nombre_responsable = validated_data["responsable"].upper()
-        # obtenemos el objeto del responsable
-        responsable = encontrarResponsable(nombre_responsable)
+    # obtenemos el nombre del responsable
+    nombre_responsable = validated_data["responsable"].upper()
+    # obtenemos el objeto del responsable
+    responsable = encontrarResponsable(nombre_responsable)
 
-        # agregamos el nuevo registro
-        Registro.objects.create(
-            app = app,
-            nombre = validated_data["nombre"],
-            usuario = validated_data["usuario"],
-            estatus = validated_data["estatus"],
-            perfil = perfil,
-            fecha_creacion = validated_data["fecha_creacion"],
-            ultimo_acceso = validated_data["ultimo_acceso"],
-            responsable = responsable
-        )
-
-    except NameError:
-        return f"No se pudo crear el registro {nombre_app}-{validated_data["usuario"]}"
+    # agregamos el nuevo registro
+    Registro.objects.create(
+        app = app,
+        nombre = validated_data["nombre"],
+        usuario = validated_data["usuario"],
+        estatus = validated_data["estatus"],
+        perfil = perfil,
+        fecha_creacion = validated_data["fecha_creacion"],
+        ultimo_acceso = validated_data["ultimo_acceso"],
+        responsable = responsable
+    )
     
 def modificar_registro(validated_data):
     """
@@ -80,19 +76,17 @@ def modificar_registro(validated_data):
     # obtenemos el nombre de usuario del registro
     nombre_usuario = validated_data["usuario"]
 
-    try:
-        # obtenemos el registro
-        obj_registro = Registro.objects.filter(app__nombre=nombre_app).get(usuario=nombre_usuario)
-        obj_registro.ultimo_acceso = validated_data["ultimo_acceso"]
+    # obtenemos el registro
+    obj_registro = Registro.objects.filter(app__nombre=nombre_app).get(usuario=nombre_usuario)
 
-        # obtenemos el responsable
-        responsable = encontrarResponsable(validated_data["responsable"])
-        obj_registro.responsable = responsable
-        obj_registro.en_extraccion = True
-        obj_registro.save()
-        
-    except NameError:
-        return f"No se pudo modificar el registro {nombre_app}-{validated_data["usuario"]}"
+    obj_registro.ultimo_acceso = validated_data["ultimo_acceso"]
+
+    # obtenemos el responsable
+    responsable = encontrarResponsable(validated_data["responsable"])
+    obj_registro.responsable = responsable
+    obj_registro.en_extraccion = True
+    obj_registro.save()
+    
 
 def borrar_op_registros(data):
     """
