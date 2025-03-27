@@ -58,8 +58,11 @@ def actualizar_registros(request):
     Registro.objects.all().update(en_extraccion=False)
     # recibe la extraccion
     messages = leer_op_registros(request.data)
+
+    if len(messages) > 0:
+        return Response({"messages": messages}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    return Response({"messages": messages}, status=status.HTTP_200_OK)
+    return Response({"messages": "Extraccion cargada!"}, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
