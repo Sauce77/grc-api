@@ -73,7 +73,7 @@ def actualizar_registros(request):
         
         return Response({"message":"Extraccion cargada!"}, status=status.HTTP_200_OK)
     else:
-        return Response({"message":"Formato de extraccion incorrecto!"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"Formato de extraccion incorrecto!","errors": registros.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
