@@ -1,12 +1,21 @@
 from django.urls import path
 
-from .views import root, mostrar_registros, actualizar_registros, mostrar_no_extraccion, borrar_registros, mostrar_all_registros
+import views 
 
 urlpatterns = [
-    path('', root),
-    path('all/', mostrar_all_registros, name="mostrar_all_registros"),
-    path("registros/<str:app>/", mostrar_registros, name="mostrar_registros"),
-    path("insertar/", actualizar_registros, name="actualizar_registros"),
-    path("omitidos/", mostrar_no_extraccion, name="mostrar_no_extraccion"),
-    path("borrar/", borrar_registros, name="borrar_registros"),
+    path('', views.root),
+    # --------- APLICATIVOS --------------------
+    path('apps/', views.mostrar_all_apps, name="mostrar_all_apps"),
+    path('apps/<str:usuario>/', views.mostrar_usuario_apps, name="mostrar_usuario_apps"),
+    # ---------- RESPONSABLES -------------------
+    path('responsables/', views.mostrar_all_responsables, name="mostrar_all_responsables"),
+    path('responsables/<str:usuario>/', views.mostrar_usuario_responsables, name="mostrar_usuario_responsables"),
+    # ---------- REGISTROS ----------------------
+    path('registros/', views.mostrar_all_registros, name="mostrar_all_registros"),
+    path("registros/<str:app>/", views.mostrar_app_registros, name="mostrar_app_registros"),
+    path("registros/<str:app>/<str:usuario>/", views.mostrar_usuario_registros, name="mostrar_usuario_registros"),
+    # ---------- EXTRACCION -----------------------
+    path("insertar/", views.actualizar_registros, name="actualizar_registros"),
+    path("omitidos/", views.mostrar_no_extraccion, name="mostrar_no_extraccion"),
+    path("borrar/", views.borrar_registros, name="borrar_registros"),
 ]

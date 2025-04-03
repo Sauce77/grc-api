@@ -36,3 +36,22 @@ class DeleteRegistroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Registro
         fields = ["id","app","usuario"]
+
+
+class GetAplicativoSerializer(serializers.ModelSerializer):
+    """
+        Serializa la informacion de los aplicativos disponibles
+    """
+
+    class Meta:
+        model = Aplicativo
+        exclude = ["id"]
+
+class GetResponsableSerializer(serializers.ModelSerializer):
+    """
+        Serializa la informaion de los responsables registrados.
+    """
+
+    class Meta:
+        model = Responsable
+        exclude = ["id"]

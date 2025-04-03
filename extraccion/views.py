@@ -1,5 +1,6 @@
 from django.shortcuts import render,HttpResponse
 from django.http import Http404
+from django.contrib.auth.models import User
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,23 +11,78 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from scripts.operaciones_registros import modificar_registro,crear_registro,borrar_op_registros
-from extraccion.serializers import PostRegistroSerializer
+from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer
 
 # Create your views here.
 
-from .models import Registro
+from .models import Registro, Aplicativo, Responsable
 
 from .serializers import GetRegistroSerializer,PostRegistroSerializer
 
 def root(request):
     return(HttpResponse("root"))
 
+
+# ----------------- APLICATIVOS --------------------
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def mostrar_all_apps(request):
+    """
+        Muestra los aplicativos registrados.
+    """
+    apps = Aplicativo.objects.all()
+    serializer = GetAplicativoSerializer(apps, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def mostrar_usuario_apps(request,usuario):
+    """
+        Muestra los aplicativos pertenecientes a registros del usuario.
+    """
+    obj_responsables = Responsable.objects.filter(usuario__username=usuario)
+    # obtenemos registros del responsable
+    obj_registros = Registro.objects.filter(responsable__in=obj_responsables)
+    # obtenemos app distintas
+    apps_unicos = obj_registros.values('app').distinct()
+
+    serializer = GetAplicativoSerializer(apps_unicos, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+# ------------------ RESPONSABLES -------------------
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def mostrar_all_responsables(request):
+    """
+        Muestra todos los responsables registrados.
+    """
+    responsables = Responsable.objects.all()
+    serializer = GetResponsableSerializer(responsables, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def mostrar_usuario_responsables(request,usuario):
+    """
+        Muestra los Responsables asociados con el usuario.
+    """
+    # obtenemos los responsables del usuario
+    responsables = Responsable.objects.filter(usuario__username=usuario)
+
+    serializer = GetResponsableSerializer(responsables, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+# --------------------- REGISTROS ---------------------
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
 def mostrar_all_registros(request):
     """
-        Muestra todos los resgistros en la base de datos.
+        Muestra todos los registros en la base de datos.
     """
     registros = Registro.objects.all()
     serializer = GetRegistroSerializer(registros, many=True)
@@ -34,8 +90,8 @@ def mostrar_all_registros(request):
     
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def mostrar_registros(request,app):
+@permission_classes([IsAdminUser])
+def mostrar_app_registros(request,app):
     """
         Muestra los registros de una app.
     """
@@ -43,10 +99,24 @@ def mostrar_registros(request,app):
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def mostrar_usuario_registros(request,app,usuario):
+    """
+        Muestra los registros de una app, solo los registros asignados.
+    """
+    # obtenemos responsables del usuario
+    obj_responsables = Responsable.objects.filter(usuario__username=usuario)
+    # filtramos los registros por app y responsable
+    registros = Registro.objects.filter(app__nombre=app).filter(responsable__in=obj_responsables)
+    serializer = GetRegistroSerializer(registros, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
+# ----------------------- EXTRACCION ---------------------
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated,IsAdminUser])
+@permission_classes([IsAdminUser])
 def actualizar_registros(request):
     """
         Recibe una extraccion completa. Actualiza los datos ya existentes en la 
