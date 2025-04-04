@@ -71,19 +71,28 @@ def modificar_registro(validated_data):
 
 def aplicar_exentar_bajas(cuentas_exentas):
     """
-        Dado una lista con Aplictivo y Usuario. Modificara los campos
-        requiere_acceso y comentarios para evadir la politica.
+        Dado una lista con Aplictivo y Usuario. Modificara el campo
+        exenta_bajas a false.
     """
+    # establecemos el valor de exenta_baja a False en todos los registros
+    Registro.objects.all().update(exenta_baja=False)
 
+    messages = []
+    # para cada cuenta exenta
     for cuenta in cuentas_exentas:
-        # encontramos el registro
-        registro = Registro.objects.filter(app__nombre=cuenta["app"]).get(username=cuenta["usuario"])
-        # modificamos los campos
-        registro.requiere_acceso = None
-        registro.comentarios = None
-        registro.save()
+        try:
+            # encontramos el registro
+            registro = Registro.objects.filter(app__nombre=cuenta["app"]).get(username=cuenta["usuario"])
+            # modificamos los campos
+            registro.requiere_acceso = None
+            registro.comentarios = None
+            registro.exenta_baja = True
+            registro.save()
+        except Registro.DoesNotExist:
+            messages.append(f"No se encontro el usuario {cuenta["app"]}-{cuenta["usuario"]}")
+            continue
 
-    return
+    return messages
 
 
 def aplicar_politica_ultimo_acceso(apps,dias_politica):
@@ -116,6 +125,10 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
     # filtramos a los registros sin ultimo acceso con fecha de creacion previa a politica
     registros_fc = registros.filter(ultimo_acceso=None).filter(fecha_creacion__lt=fecha_politica)
     registros_fc.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
+
+    # filtramos a las cuentas exentas de bajas
+    registros_exentos = registros.filter(exenta_baja=True)
+    registros_exentos.update(requiere_acceso=None, comentarios=None)
 
     return
     

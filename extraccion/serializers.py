@@ -2,6 +2,13 @@ from rest_framework import serializers
 
 from .models import Aplicativo, Perfil, Responsable, Registro
 
+class PostCuentasExentas(serializers.Serializer):
+    """
+        Serializa la cuentas exentas de bajas.
+    """
+    app = serializers.CharField(max_length=100,required=True)
+    usuario = serializers.CharField(max_length=100,required=True)
+
 class GetAplicativoSerializer(serializers.ModelSerializer):
     """
         Serializa la informacion de los aplicativos disponibles
@@ -10,7 +17,7 @@ class GetAplicativoSerializer(serializers.ModelSerializer):
         model = Aplicativo
         exclude = ["id"]
 
-class PostPoliticaUltimoAcceso(serializers.ModelSerializer):
+class PostPoliticaUltimoAcceso(serializers.Serializer):
     """
         Serializa la peticion para realizar la politica
     """
