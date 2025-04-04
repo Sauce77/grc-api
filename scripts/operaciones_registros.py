@@ -1,29 +1,10 @@
+from datetime import datetime,timedelta
+
 from extraccion.models import Registro
 from .asignacion import encontrarPerfil,encontrarAplicativo,encontrarResponsable
 from extraccion.serializers import PostRegistroSerializer,DeleteRegistroSerializer
 
 from extraccion.models import Registro
-
-def leer_op_registros(data):
-    """
-        Utiliza la informacion recibida en el cuerpo del request
-        para crear, actualizar y borrar los registros de la base
-        de datos con respecto a la extraccion. 
-    """
-    messages = []
-    registros = PostRegistroSerializer(data=data, many=True)
-
-    if registros.is_valid():
-        for registro in registros.validated_data:
-            if Registro.objects.filter(app__nombre=registro["app"]).filter(usuario=registro["usuario"]).exists():
-                message_log = modificar_registro(registro)
-            else:
-                message_log = crear_registro(registro)
-
-            if message_log != None:
-                messages.append(message_log)
-
-    return messages
 
 def crear_registro(validated_data):
     """
@@ -68,8 +49,7 @@ def crear_registro(validated_data):
 def modificar_registro(validated_data):
     """
         Modifica los campos de un registro ya existente, deberia
-        solo modifcar el ultimo acceso, aunque se ejecutara la accion
-        con cada campo.
+        solo modifcar el ultimo acceso y responsable.
     """
     # obtenemos el nombre del app
     nombre_app = validated_data["app"]
@@ -85,33 +65,58 @@ def modificar_registro(validated_data):
     responsable = encontrarResponsable(validated_data["responsable"])
     obj_registro.responsable = responsable
     obj_registro.en_extraccion = True
+    obj_registro.comentarios = None
     obj_registro.save()
-    
 
-def borrar_op_registros(data):
+
+def aplicar_exentar_bajas(cuentas_exentas):
     """
-        Aquellos usuarios que no aparezcan en la extraccion serán borrados
-        de la base de datos.
+        Dado una lista con Aplictivo y Usuario. Modificara los campos
+        requiere_acceso y comentarios para evadir la politica.
     """
-    # almacena los errores al momento 
-    messages = []
 
-    registros = DeleteRegistroSerializer(data=data, many=True)
+    for cuenta in cuentas_exentas:
+        # encontramos el registro
+        registro = Registro.objects.filter(app__nombre=cuenta["app"]).get(username=cuenta["usuario"])
+        # modificamos los campos
+        registro.requiere_acceso = None
+        registro.comentarios = None
+        registro.save()
 
-    if registros.is_valid(): 
-        for registro in registros.validated_data:
-
-            nombre_app = registro["app"]
-            nombre_usuario = registro["usuario"]
-
-            try:
-                Registro.objects.filter(app=nombre_app).get(usuario=nombre_usuario).delete()
-                messages.append(f"Usuario: {nombre_usuario} - App: {nombre_app}. Borrado.")
-            except :
-                messages.append(f"No se encontro {nombre_usuario} en {nombre_app}.")
-        
-    return messages
-        
+    return
 
 
+def aplicar_politica_ultimo_acceso(apps,cuentas_exentas,dias_politica):
+    """
+        Considerando un periodo de tiempo, los usuario que rebasen este
+        periodo tras su ultima conexion seran marcados como 
+        requiere_acceso = NO.
+        En caso de no contar con ultimo_acceso se toma en cuenta
+        la fecha de creacion.
+        Se deben especificar sobre que aplicativos.
+    """
+
+    # obtenemos la fecha hoy
+    fecha_hoy = datetime.now()
+    # obtenemos mes y anio
+    fecha_mm_yyyy = fecha_hoy.strftime("%Y-%m")
+    # establecemos el primer dia del mes
+    fecha_primero = datetime.strptime(fecha_mm_yyyy + "-01", "%Y-%m-%d")
+    # restamos_dias_politica
+    fecha_politica = fecha_primero - timedelta(days=dias_politica)
+
+    # obtenemos registros de las apps para politica
+    registros = Registro.objects.filter(app__nombre__in=apps)
+
+
+    # filtramos a los registros con ultimo acceso anterior a politica
+    registros_ua = registros.exclude(ultimo_acceso=None).filter(ultimo_acceso__lt=fecha_politica)
+    registros_ua.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
+
+    # filtramos a los registros sin ultimo acceso con fecha de creacion previa a politica
+    registros_fc = registros.filter(ultimo_acceso=None).filter(fecha_creacion__lt=fecha_politica)
+    registros_fc.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
+
+    aplicar_exentar_bajas(cuentas_exentas)
+    return
     

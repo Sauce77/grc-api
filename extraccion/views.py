@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from scripts.operaciones_registros import modificar_registro,crear_registro,borrar_op_registros
+from scripts.operaciones_registros import modificar_registro,crear_registro,aplicar_politica_ultimo_acceso
 from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer
 
 # Create your views here.
@@ -126,7 +126,7 @@ def actualizar_registros(request):
         si es verdadero, el registro fue encontrado en la extraccion.
     """
     # colocamos el estado "en_extraccion" como false
-    Registro.objects.all().update(en_extraccion=False)
+    Registro.objects.all().update(en_extraccion=False,comentarios="No se encuentra en extraccion.")
 
     # serializar contenido de request
     registros = PostRegistroSerializer(data=request.data, many=True)
@@ -158,13 +158,13 @@ def mostrar_no_extraccion(request):
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+"""
 @api_view(["DELETE"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
 def borrar_registros(request):
-    """
-        Elimina los registros señalados en el JSON, es importante indicar
-        el APP y USUARIO a eliminar.
-    """
+
     messages = borrar_op_registros(request.data)
     return Response(messages, status=status.HTTP_204_NO_CONTENT)
+
+"""
