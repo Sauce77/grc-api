@@ -86,7 +86,7 @@ def aplicar_exentar_bajas(cuentas_exentas):
     return
 
 
-def aplicar_politica_ultimo_acceso(apps,cuentas_exentas,dias_politica):
+def aplicar_politica_ultimo_acceso(apps,dias_politica):
     """
         Considerando un periodo de tiempo, los usuario que rebasen este
         periodo tras su ultima conexion seran marcados como 
@@ -117,6 +117,5 @@ def aplicar_politica_ultimo_acceso(apps,cuentas_exentas,dias_politica):
     registros_fc = registros.filter(ultimo_acceso=None).filter(fecha_creacion__lt=fecha_politica)
     registros_fc.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
 
-    aplicar_exentar_bajas(cuentas_exentas)
     return
     

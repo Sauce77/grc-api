@@ -70,6 +70,7 @@ class Registro(models.Model):
     comentarios = models.TextField(null=True, blank=True)
 
     en_extraccion = models.BooleanField(default=True)
+    exenta_baja = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nombre

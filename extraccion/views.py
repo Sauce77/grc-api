@@ -11,7 +11,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from scripts.operaciones_registros import modificar_registro,crear_registro,aplicar_politica_ultimo_acceso
-from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer
+from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer, PostPoliticaUltimoAcceso
 
 # Create your views here.
 
@@ -114,6 +114,25 @@ def mostrar_usuario_registros(request,app,usuario):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # ----------------------- EXTRACCION ---------------------
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def aplicar_politica_registros(request):
+    """
+        Recibe un json indicando los dias de politica y los
+        aplicativos donde se aplica la politica.
+    """
+    peticion = PostPoliticaUltimoAcceso(data=request.data)
+
+    if peticion.is_valid():
+        dias_politica = peticion.validated_data["dias"]
+        apps = peticion.validated_data["apps"]
+
+        aplicar_politica_registros(apps=apps,dias_politica=dias_politica)
+        return Response({"message": "Politica aplicada con exito!"},status=status.HTTP_200_OK)
+    
+    return Response({"message":"Formulario invalido.","errors": peticion.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
