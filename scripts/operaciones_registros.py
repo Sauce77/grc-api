@@ -82,15 +82,14 @@ def aplicar_exentar_bajas(cuentas_exentas):
     for cuenta in cuentas_exentas:
         try:
             # encontramos el registro
-            registro = Registro.objects.filter(app__nombre=cuenta["app"]).get(username=cuenta["usuario"])
+            registro = Registro.objects.filter(app__nombre=cuenta["app"]).get(usuario=cuenta["usuario"])
             # modificamos los campos
             registro.requiere_acceso = None
             registro.comentarios = None
             registro.exenta_baja = True
             registro.save()
         except Registro.DoesNotExist:
-            messages.append(f"No se encontro el usuario {cuenta["app"]}-{cuenta["usuario"]}")
-            continue
+            messages.append(f"No se encontro el usuario {cuenta["app"]} en {cuenta["usuario"]}")
 
     return messages
 

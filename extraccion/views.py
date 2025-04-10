@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from scripts.operaciones_registros import modificar_registro,crear_registro,aplicar_politica_ultimo_acceso
+from scripts.operaciones_registros import modificar_registro,crear_registro,aplicar_politica_ultimo_acceso,aplicar_exentar_bajas
 from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer, PostPoliticaUltimoAcceso, PostCuentasExentas
 
 # Create your views here.
@@ -142,13 +142,13 @@ def aplicar_exentas_bajas(request):
         Recibe una lista de app-usuarios, estos usuarios modificaran
         su valor exenta_bajas a True.
     """
-    cuentas = PostCuentasExentas(data=request.data, many=True)
+    cuentas = PostCuentasExentas(data=request.data,many=True)
 
     if cuentas.is_valid():
-        messages = aplicar_exentas_bajas(cuentas)
+         messages = aplicar_exentar_bajas(cuentas.validated_data)
+         return Response({"messages": messages},status=status.HTTP_200_OK)
     else:
-        return Response(cuentas.errors,status=status.HTTP_400_BAD_REQUEST)
-    return Response(messages,status=status.HTTP_200_OK)
+        return Response(cuentas.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ----------------------- EXTRACCION ---------------------
 
