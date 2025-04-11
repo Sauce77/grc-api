@@ -84,8 +84,8 @@ def aplicar_exentar_bajas(cuentas_exentas):
             # encontramos el registro
             registro = Registro.objects.filter(app__nombre=cuenta["app"]).get(usuario=cuenta["usuario"])
             # modificamos los campos
-            registro.requiere_acceso = None
-            registro.comentarios = None
+            registro.requiere_acceso = "SI"
+            registro.comentarios = "Cuenta exenta de bajas"
             registro.exenta_baja = True
             registro.save()
         except Registro.DoesNotExist:

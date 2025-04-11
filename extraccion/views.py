@@ -108,8 +108,13 @@ def mostrar_usuario_registros(request,app,usuario):
     """
     # obtenemos responsables del usuario
     obj_responsables = Responsable.objects.filter(usuario__username=usuario)
-    # filtramos los registros por app y responsable
-    registros = Registro.objects.filter(app__nombre=app).filter(responsable__in=obj_responsables)
+    # filtramos los registros por app 
+    registros = Registro.objects.filter(app__nombre=app)
+    # filtramos por responsable
+    registros = registros.filter(responsable__in=obj_responsables)
+    # filtramos aparecen en extraccion
+    registros = registros.filter(en_extraccion=True)
+    
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -193,6 +198,19 @@ def mostrar_no_extraccion(request):
         mas reciente
     """
     registros = Registro.objects.filter(en_extraccion=False)
+    serializer = GetRegistroSerializer(registros, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def mostrar_exentas_bajas(request):
+    """
+        Muestra los registros cuyo atributo "exentas_bajas"=True
+        Esto quiere decir que son exentas a la politica o bajas de
+        responsable
+    """
+    registros = Registro.objects.filter(exenta_baja=True)
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 

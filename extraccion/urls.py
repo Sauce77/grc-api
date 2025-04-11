@@ -16,9 +16,10 @@ urlpatterns = [
     path("registros/<str:app>/<str:usuario>/", views.mostrar_usuario_registros, name="mostrar_usuario_registros"),
     # ---------- POLITICAS ----------------------
     path('politica/', views.aplicar_politica_registros, name="aplicar_politica_registros"),
-    path('exentas/', views.aplicar_exentas_bajas, name="aplicar_exentas_bajas"),
+    path('exentar/', views.aplicar_exentas_bajas, name="aplicar_exentas_bajas"),
     # ---------- EXTRACCION -----------------------
     path("insertar/", views.actualizar_registros, name="actualizar_registros"),
     path("omitidos/", views.mostrar_no_extraccion, name="mostrar_no_extraccion"),
+    path("exentas/", views.mostrar_exentas_bajas, name="mostrar_exentas_bajas"),
     # path("borrar/", views.borrar_registros, name="borrar_registros"),
 ]
