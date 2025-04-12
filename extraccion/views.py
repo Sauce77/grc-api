@@ -47,8 +47,10 @@ def mostrar_usuario_apps(request,usuario):
     obj_registros = Registro.objects.filter(responsable__in=obj_responsables)
     # obtenemos app distintas
     apps_unicos = obj_registros.values('app').distinct()
+    # filtramos las apps
+    obj_apps = Aplicativo.objects.filter(id__in=apps_unicos)
 
-    serializer = GetAplicativoSerializer(apps_unicos, many=True)
+    serializer = GetAplicativoSerializer(obj_apps, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # ------------------ RESPONSABLES -------------------
