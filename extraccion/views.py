@@ -104,7 +104,24 @@ def mostrar_app_registros(request,app):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def mostrar_usuario_registros(request,app,usuario):
+def mostrar_usuario_registros(request,usuario):
+    """
+        Muestra los registros todos los registros asignados al usuario.
+    """
+    # obtenemos responsables del usuario
+    obj_responsables = Responsable.objects.filter(usuario__username=usuario)
+    # filtramos por responsable
+    registros = registros.filter(responsable__in=obj_responsables)
+    # filtramos aparecen en extraccion
+    registros = registros.filter(en_extraccion=True)
+    
+    serializer = GetRegistroSerializer(registros, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def mostrar_usuario_app_registros(request,app,usuario):
     """
         Muestra los registros de una app, solo los registros asignados.
     """
