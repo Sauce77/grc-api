@@ -130,4 +130,4 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
     registros_exentos.update(requiere_acceso=None, comentarios=None)
 
     return
-    
+
