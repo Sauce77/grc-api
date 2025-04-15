@@ -12,9 +12,7 @@ urlpatterns = [
     path('responsables/<str:usuario>/', views.mostrar_usuario_responsables, name="mostrar_usuario_responsables"),
     # ---------- REGISTROS ----------------------
     path('registros/', views.mostrar_all_registros, name="mostrar_all_registros"),
-    path("registros/<str:app>/", views.mostrar_app_registros, name="mostrar_app_registros"),
-    path("registros/<str:usuario>/", views.mostrar_usuario_registros, name="mostrar_usuario_registros"),
-    path("registros/<str:app>/<str:usuario>/", views.mostrar_usuario_app_registros, name="mostrar_usuario_app_registros"),
+    path("registros/app/<str:app>/", views.mostrar_app_registros, name="mostrar_app_registros"),
     # ---------- POLITICAS ----------------------
     path('politica/', views.aplicar_politica_registros, name="aplicar_politica_registros"),
     path('exentar/', views.aplicar_exentas_bajas, name="aplicar_exentas_bajas"),
