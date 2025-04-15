@@ -10,7 +10,8 @@ from .serializers import PostRespuestaSerializer
 
 from extraccion.models import Registro
 
-from scripts.operaciones_registros import modificar_acceso_registro
+def root(request):
+    return "root"
 
 # -------------------------- CERTIFICACION -----------------------
 
