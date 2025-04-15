@@ -4,10 +4,9 @@ from extraccion.models import Registro
 from extraccion.serializers import Aplicativo
 
 class PostRespuestaSerializer(serializers.ModelSerializer):
-    app = serializers.StringRelatedField()
 
     class Meta:
         model = Registro
-        include = ["app","usuario","requiere_acceso","comentarios"]
+        fields = ["app","usuario","requiere_acceso","comentarios"]
 
         
