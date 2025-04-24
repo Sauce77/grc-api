@@ -153,6 +153,8 @@ def actualizar_registros(request):
         Para detectar los que no estan presentes, se recurre al atributo "en_extraccion",
         si es verdadero, el registro fue encontrado en la extraccion.
     """
+    # reestablecemos los valores de requiere_acceso y comentarios
+    Registro.objects.all().update(requiere_acceso=None, comentarios=None)
     # colocamos el estado "en_extraccion" como false
     Registro.objects.all().update(en_extraccion=False,comentarios="No se encuentra en extraccion.")
 
@@ -199,13 +201,16 @@ def mostrar_exentas_bajas(request):
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-"""
 @api_view(["DELETE"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
-def borrar_registros(request):
-
-    messages = borrar_op_registros(request.data)
-    return Response(messages, status=status.HTTP_204_NO_CONTENT)
-
-"""
+def borrar_registros_baja(request):
+    """
+        Borra los registros no exentos de bajas cuyo valor de requiere_acceso sea NO.
+    """
+    try:
+        registros = Registro.objects.filter(exenta_baja=False).filter(requiere_acceso="NO")
+        registros.delete()
+        return Response({"message": "Bajas realizadas!"}, status=status.HTTP_204_NO_CONTENT)
+    except Registro.DoesNotExist:
+        return Response({"message": "No se encontraron registros"}, status=status.HTTP_404_NOT_FOUND)
