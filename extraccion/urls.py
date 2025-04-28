@@ -13,12 +13,9 @@ urlpatterns = [
     # ---------- REGISTROS ----------------------
     path('registros/', views.mostrar_all_registros, name="mostrar_all_registros"),
     path("registros/app/<str:app>/", views.mostrar_app_registros, name="mostrar_app_registros"),
-    # ---------- POLITICAS ----------------------
-    path('politica/', views.aplicar_politica_registros, name="aplicar_politica_registros"),
-    path('exentar/', views.aplicar_exentas_bajas, name="aplicar_exentas_bajas"),
     # ---------- EXTRACCION -----------------------
     path("insertar/", views.actualizar_registros, name="actualizar_registros"),
     path("omitidos/", views.mostrar_no_extraccion, name="mostrar_no_extraccion"),
     path("exentas/", views.mostrar_exentas_bajas, name="mostrar_exentas_bajas"),
-    # path("borrar/", views.borrar_registros, name="borrar_registros"),
+    path("borrar/", views.borrar_registros_baja, name="borrar_registros"),
 ]

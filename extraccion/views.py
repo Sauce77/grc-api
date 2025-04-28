@@ -10,8 +10,8 @@ from rest_framework.decorators import api_view
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from scripts.operaciones_registros import modificar_registro,crear_registro,aplicar_politica_ultimo_acceso,aplicar_exentar_bajas
-from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer, PostPoliticaUltimoAcceso, PostCuentasExentas
+from scripts.operaciones_registros import modificar_registro,crear_registro
+from extraccion.serializers import PostRegistroSerializer, GetAplicativoSerializer, GetResponsableSerializer
 
 # Create your views here.
 
@@ -101,45 +101,6 @@ def mostrar_app_registros(request,app):
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
-# ------------- POLITICAS --------------------------
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAdminUser])
-def aplicar_politica_registros(request):
-    """
-        Recibe un json indicando los dias de politica y los
-        aplicativos donde se aplica la politica.
-    """
-    peticion = PostPoliticaUltimoAcceso(data=request.data)
-
-    if peticion.is_valid():
-        dias_politica = peticion.validated_data["dias"]
-        apps = peticion.validated_data["apps"]
-
-        aplicar_politica_ultimo_acceso(apps=apps,dias_politica=dias_politica)
-        return Response({"message": "Politica aplicada con exito!"},status=status.HTTP_200_OK)
-    
-    return Response({"message":"Formulario invalido.","errors": peticion.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAdminUser])
-def aplicar_exentas_bajas(request):
-    """
-        Recibe una lista de app-usuarios, estos usuarios modificaran
-        su valor exenta_bajas a True.
-    """
-    cuentas = PostCuentasExentas(data=request.data,many=True)
-
-    if cuentas.is_valid():
-         messages = aplicar_exentar_bajas(cuentas.validated_data)
-         return Response({"messages": messages},status=status.HTTP_200_OK)
-    else:
-        return Response(cuentas.errors, status=status.HTTP_400_BAD_REQUEST)
-
 # ----------------------- EXTRACCION ---------------------
 
 @api_view(["POST"])
@@ -153,8 +114,8 @@ def actualizar_registros(request):
         Para detectar los que no estan presentes, se recurre al atributo "en_extraccion",
         si es verdadero, el registro fue encontrado en la extraccion.
     """
-    # reestablecemos los valores de requiere_acceso y comentarios
-    Registro.objects.all().update(requiere_acceso=None, comentarios=None)
+    # reestablecemos los valores de requiere_acceso y comentarios (excluye exentas de bajas)
+    Registro.objects.all().filter(exenta_baja=False).update(requiere_acceso=None, comentarios=None)
     # colocamos el estado "en_extraccion" como false
     Registro.objects.all().update(en_extraccion=False,comentarios="No se encuentra en extraccion.")
 
