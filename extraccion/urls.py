@@ -17,5 +17,6 @@ urlpatterns = [
     path("insertar/", views.actualizar_registros, name="actualizar_registros"),
     path("omitidos/", views.mostrar_no_extraccion, name="mostrar_no_extraccion"),
     path("exentas/", views.mostrar_exentas_bajas, name="mostrar_exentas_bajas"),
-    path("borrar/", views.borrar_registros_baja, name="borrar_registros"),
+    path("bajas/", views.mostrar_registros_baja, name="mostrar_registros_baja"),
+    path("borrar/", views.borrar_registros_baja, name="borrar_registros_baja"),
 ]

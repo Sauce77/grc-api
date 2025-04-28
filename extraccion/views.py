@@ -162,6 +162,17 @@ def mostrar_exentas_bajas(request):
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def mostrar_registros_baja(request):
+    """
+        Muestra los registros cuyo atributo "requiere_acceso"="NO".
+    """
+    registros = Registro.objects.filter(requiere_acceso="NO")
+    serializer = GetRegistroSerializer(registros, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(["DELETE"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
