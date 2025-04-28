@@ -104,6 +104,8 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
         Se deben especificar sobre que aplicativos.
     """
 
+    # restablecemos bajas de los registros
+    Registro.objects.filter(exenta_baja=False).update(requiere_acceso=None,comentarios=None)
     # obtenemos la fecha hoy
     fecha_hoy = datetime.now()
     # obtenemos mes y anio
@@ -113,8 +115,13 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
     # restamos_dias_politica
     fecha_politica = fecha_primero - timedelta(days=dias_politica)
 
+    nombre_apps = []
+
+    for app in apps:
+        nombre_apps.append(app["nombre"])
+
     # obtenemos registros de las apps para politica
-    registros = Registro.objects.filter(app__nombre__in=apps)
+    registros = Registro.objects.filter(app__nombre__in=nombre_apps)
 
 
     # filtramos a los registros con ultimo acceso anterior a politica
