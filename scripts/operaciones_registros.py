@@ -120,9 +120,8 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
     for app in apps:
         nombre_apps.append(app["nombre"])
 
-    # obtenemos registros de las apps para politica
-    registros = Registro.objects.filter(app__nombre__in=nombre_apps)
-
+    # obtenemos registros de las apps para politica no exentas de baja
+    registros = Registro.objects.filter(exenta_baja=False).filter(app__nombre__in=nombre_apps)
 
     # filtramos a los registros con ultimo acceso anterior a politica
     registros_ua = registros.exclude(ultimo_acceso=None).filter(ultimo_acceso__lt=fecha_politica)
@@ -131,9 +130,3 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
     # filtramos a los registros sin ultimo acceso con fecha de creacion previa a politica
     registros_fc = registros.filter(ultimo_acceso=None).filter(fecha_creacion__lt=fecha_politica)
     registros_fc.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
-
-    # filtramos a las cuentas exentas de bajas
-    registros_exentos = registros.filter(exenta_baja=True)
-    registros_exentos.update(requiere_acceso=None, comentarios=None)
-
-    return
