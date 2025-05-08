@@ -115,9 +115,9 @@ def actualizar_registros(request):
         si es verdadero, el registro fue encontrado en la extraccion.
     """
     # reestablecemos los valores de requiere_acceso y comentarios (excluye exentas de bajas)
-    Registro.objects.filter(exenta_baja=False).update(requiere_acceso=None, comentarios=None)
+    Registro.objects.filter(exenta_baja=False).update(requiere_acceso=None, comentarios="No se encuentra en extraccion")
     # colocamos el estado "en_extraccion" como false
-    Registro.objects.all().update(en_extraccion=False,comentarios="No se encuentra en extraccion.")
+    Registro.objects.all().update(en_extraccion=False)
 
     # serializar contenido de request
     registros = PostRegistroSerializer(data=request.data, many=True)

@@ -64,11 +64,7 @@ def modificar_registro(validated_data):
     responsable = encontrarResponsable(validated_data["responsable"])
     obj_registro.responsable = responsable
     obj_registro.en_extraccion = True
-
-    if not obj_registro.exenta_baja:
-        # borramos los comentarios excepto para las cuentas
-        # excentas de bajas 
-        obj_registro.comentarios = None
+    obj_registro.comentarios = None
 
     obj_registro.save()
 
