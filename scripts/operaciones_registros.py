@@ -64,7 +64,10 @@ def modificar_registro(validated_data):
     responsable = encontrarResponsable(validated_data["responsable"])
     obj_registro.responsable = responsable
     obj_registro.en_extraccion = True
-    obj_registro.comentarios = None
+
+    if obj_registro.exenta_baja == False:
+        # si el registro es exento de bajas que no se elimine el comentario
+        obj_registro.comentarios = None
 
     obj_registro.save()
 
@@ -74,6 +77,8 @@ def aplicar_exentar_bajas(cuentas_exentas):
         Dado una lista con Aplictivo y Usuario. Modificara el campo
         exenta_bajas a false.
     """
+    # restablece valores de comentarios y requiere acceso para las cuentas exentas anteriores
+    Registro.objects.filter(exenta_baja=True).update(requiere_acceso=None, comentarios=None, enviado=True)
     # establecemos el valor de exenta_baja a False en todos los registros
     Registro.objects.all().update(exenta_baja=False)
 
@@ -87,6 +92,7 @@ def aplicar_exentar_bajas(cuentas_exentas):
             registro.requiere_acceso = "SI"
             registro.comentarios = "Cuenta exenta de bajas"
             registro.exenta_baja = True
+            registro.enviado = False
             registro.save()
         except Registro.DoesNotExist:
             messages.append(f"No se encontro el usuario {cuenta["app"]} en {cuenta["usuario"]}")
@@ -125,8 +131,8 @@ def aplicar_politica_ultimo_acceso(apps,dias_politica):
 
     # filtramos a los registros con ultimo acceso anterior a politica
     registros_ua = registros.exclude(ultimo_acceso=None).filter(ultimo_acceso__lt=fecha_politica)
-    registros_ua.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
+    registros_ua.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS", enviado=False)
 
     # filtramos a los registros sin ultimo acceso con fecha de creacion previa a politica
     registros_fc = registros.filter(ultimo_acceso=None).filter(fecha_creacion__lt=fecha_politica)
-    registros_fc.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS")
+    registros_fc.update(requiere_acceso="NO", comentarios=f"BAJA POLITICA {dias_politica} DIAS", enviado=False)
