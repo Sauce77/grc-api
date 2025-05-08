@@ -71,6 +71,7 @@ class Registro(models.Model):
 
     en_extraccion = models.BooleanField(default=True)
     exenta_baja = models.BooleanField(default=False)
+    enviado = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre

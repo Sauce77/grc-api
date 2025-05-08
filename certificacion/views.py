@@ -53,7 +53,7 @@ def enviar_certificacion_usuarios(request):
 @permission_classes([IsAuthenticated])
 def mostrar_usuario_registros(request,usuario):
     """
-        Muestra los registros todos los registros asignados al usuario.
+        Muestra todos los registros asignados al usuario.
     """
     # obtenemos el usuario
     obj_usuario = User.objects.get(username=usuario)

@@ -115,7 +115,7 @@ def actualizar_registros(request):
         si es verdadero, el registro fue encontrado en la extraccion.
     """
     # reestablecemos los valores de requiere_acceso y comentarios (excluye exentas de bajas)
-    Registro.objects.all().filter(exenta_baja=False).update(requiere_acceso=None, comentarios=None)
+    Registro.objects.filter(exenta_baja=False).update(requiere_acceso=None, comentarios=None)
     # colocamos el estado "en_extraccion" como false
     Registro.objects.all().update(en_extraccion=False,comentarios="No se encuentra en extraccion.")
 
