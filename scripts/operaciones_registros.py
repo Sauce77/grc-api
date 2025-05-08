@@ -48,8 +48,7 @@ def crear_registro(validated_data):
     
 def modificar_registro(validated_data):
     """
-        Modifica los campos de un registro ya existente, deberia
-        solo modifcar el ultimo acceso y responsable.
+        Modifica los campos de un registro ya existente.
     """
     # obtenemos el nombre del app
     nombre_app = validated_data["app"]
@@ -65,7 +64,12 @@ def modificar_registro(validated_data):
     responsable = encontrarResponsable(validated_data["responsable"])
     obj_registro.responsable = responsable
     obj_registro.en_extraccion = True
-    obj_registro.comentarios = None
+
+    if not obj_registro.exenta_baja:
+        # borramos los comentarios excepto para las cuentas
+        # excentas de bajas 
+        obj_registro.comentarios = None
+
     obj_registro.save()
 
 
