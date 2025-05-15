@@ -182,7 +182,9 @@ def borrar_registros_baja(request):
         Borra los registros no exentos de bajas cuyo valor de requiere_acceso sea NO.
     """
     # serializamos registros de la respuesta
-    registros_serializer = GetRegistroSerializer(data=request.data, many=True)
+    registros_serializer = PostRegistroSerializer(data=request.data, many=True)
+
+    messages = []
 
     if registros_serializer.is_valid():
         
@@ -193,9 +195,11 @@ def borrar_registros_baja(request):
                 obj_registro = obj_registro_app.get(usuario=registro["usuario"])
                 obj_registro.delete()
             except Registro.DoesNotExist:
-                return Response({"message": f"El usuario {registro["app"]} - {registro["usuario"]} no fue encontrado."}, status=status.HTTP_404_NOT_FOUND)
-            
-        # si se iteraron todos los registros
-        return Response({"message": "Registros borrados."}, status=status.HTTP_204_NO_CONTENT)
+                messages.append(f"El usuario {registro["app"]} - {registro["usuario"]} no fue encontrado.")
+
+        # al recorrer todos los registros   
+        messages.append("Registros borrados.")
+
+        return Response({"message": messages}, status=status.HTTP_204_NO_CONTENT)
     else:
         return Response({"message": "Formato incorrecto."}, status=status.HTTP_400_BAD_REQUEST)
