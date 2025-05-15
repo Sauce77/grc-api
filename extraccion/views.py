@@ -135,6 +135,7 @@ def actualizar_registros(request):
         return Response({"message":"Extraccion cargada!"}, status=status.HTTP_200_OK)
     else:
         return Response({"message":"Formato de extraccion incorrecto!","errors": registros.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
@@ -180,9 +181,21 @@ def borrar_registros_baja(request):
     """
         Borra los registros no exentos de bajas cuyo valor de requiere_acceso sea NO.
     """
-    try:
-        registros = Registro.objects.filter(exenta_baja=False).filter(requiere_acceso="NO")
-        registros.delete()
-        return Response({"message": "Bajas realizadas!"}, status=status.HTTP_204_NO_CONTENT)
-    except Registro.DoesNotExist:
-        return Response({"message": "No se encontraron registros"}, status=status.HTTP_404_NOT_FOUND)
+    # serializamos registros de la respuesta
+    registros_serializer = GetRegistroSerializer(data=request.data, many=True)
+
+    if registros_serializer.is_valid():
+        
+        for registro in registros_serializer.validated_data:
+            try:
+                # filtramos registros de la app y con la respuesta
+                obj_registro_app = Registro.objects.filter(app__nombre=registro["app"]).filter(requiere_acceso=registro["requiere_acceso"])
+                obj_registro = obj_registro_app.get(usuario=registro["usuario"])
+                obj_registro.delete()
+            except Registro.DoesNotExist:
+                return Response({"message": f"El usuario {registro["app"]} - {registro["usuario"]} no fue encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            
+        # si se iteraron todos los registros
+        return Response({"message": "Registros borrados."}, status=status.HTTP_204_NO_CONTENT)
+    else:
+        return Response({"message": "Formato incorrecto."}, status=status.HTTP_400_BAD_REQUEST)
