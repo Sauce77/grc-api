@@ -174,6 +174,18 @@ def mostrar_registros_baja(request):
     serializer = GetRegistroSerializer(registros, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def mostrar_registros_baja_app(request,app):
+    """
+        Muestra los registros baja por aplicacion.
+    """
+    registros = Registro.objects.filter(app__nombre=app).filter(requiere_acceso="NO")
+    serializer = GetRegistroSerializer(registros, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(["DELETE"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
