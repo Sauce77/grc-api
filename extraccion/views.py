@@ -186,7 +186,7 @@ def mostrar_registros_baja_app(request,app):
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-@api_view(["DELETE"])
+@api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
 def borrar_registros_baja(request):
@@ -215,3 +215,17 @@ def borrar_registros_baja(request):
         return Response({"message": messages}, status=status.HTTP_204_NO_CONTENT)
     else:
         return Response({"message": "Formato incorrecto."}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(["DELETE"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def borrar_registro(request,id):
+    """
+        Borra un registro de la extraccion.
+    """
+    try:
+        registro = Registro.objects.get(id=id)
+        registro.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Registro.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)

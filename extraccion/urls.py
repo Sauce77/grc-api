@@ -20,5 +20,6 @@ urlpatterns = [
     # ------------ BAJAS ---------------------------
     path("bajas/", views.mostrar_registros_baja, name="mostrar_registros_baja"),
     path("bajas/<str:app>/", views.mostrar_registros_baja_app, name="mostrar_bajas_app"),
-    path("borrar/", views.borrar_registros_baja, name="borrar_registros_baja"),
+    path("batch/", views.borrar_registros_baja, name="borrar_registros_baja"),
+    path("borrar/<int:id>/", views.borrar_registro, name="borrar_registro")
 ]
